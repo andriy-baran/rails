@@ -329,6 +329,15 @@ module ActiveRecord
       self
     end
 
+    def load_columns(table_columns)
+      spawn.load_columns!(table_columns)
+    end
+
+    def load_columns!(table_columns) # :nodoc:
+      self.load_columns_value = table_columns
+      self
+    end
+
     # Extracts a named +association+ from the relation. The named association is first preloaded,
     # then the individual association records are collected from the relation. Like so:
     #
@@ -766,7 +775,7 @@ module ActiveRecord
     VALID_UNSCOPING_VALUES = Set.new([:where, :select, :group, :order, :lock,
                                      :limit, :offset, :joins, :left_outer_joins, :annotate,
                                      :includes, :eager_load, :preload, :from, :readonly,
-                                     :having, :optimizer_hints, :with])
+                                     :having, :optimizer_hints, :with, :load_columns])
 
     # Removes an unwanted relation that is already defined on a chain of relations.
     # This is useful when passing around chains of relations and would like to
@@ -1595,7 +1604,7 @@ module ActiveRecord
 
     def construct_join_dependency(associations, join_type) # :nodoc:
       ActiveRecord::Associations::JoinDependency.new(
-        model, table, associations, join_type
+        model, table, associations, join_type, load_columns: load_columns_value
       )
     end
 
